@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "amsi.wireguard",
+  "name": "WireGuard",
+  "version": "1.0.0",
+  "author": "vyacheslav-voloshyn",
+  "description": "WireGuard (NetworkManager) connection indicator and toggle",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "WireGuard",
+    "description": "Shows whether a NetworkManager WireGuard connection is up; click toggles it",
+    "category": "Network",
+    "allowMultiple": true,
+    "defaultSection": "right",
+    "defaults": {
+      "connection": "workpc"
+    },
+    "schema": [
+      {
+        "key": "connection",
+        "type": "string",
+        "label": "NetworkManager connection name",
+        "defaultValue": "workpc"
+      }
+    ]
+  }
+}
