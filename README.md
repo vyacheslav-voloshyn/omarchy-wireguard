@@ -3,6 +3,10 @@
 Bar widget for [Omarchy](https://omarchy.org) that shows whether a
 NetworkManager WireGuard connection is up and toggles it with a click.
 
+| Up | Down |
+|---|---|
+| ![Connection up](screenshots/up.png) | ![Connection down](screenshots/down.png) |
+
 - Shield-lock icon, bright when the connection is up, dimmed when it is down,
   highlighted while it is coming up or going down.
 - Tooltip shows the connection name and its state.
