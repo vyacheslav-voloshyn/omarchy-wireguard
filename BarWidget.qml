@@ -9,7 +9,11 @@ BarWidget {
   id: root
   moduleName: "amsi.wireguard"
 
-  readonly property string connection: String(setting("connection", "workpc"))
+  // Empty means the first WireGuard connection NetworkManager knows, so a
+  // single tunnel works without any setup.
+  readonly property string configured: String(setting("connection", ""))
+  property string detected: ""
+  readonly property string connection: configured !== "" ? configured : detected
   // "activated", "activating", "deactivating", or "" when down or missing.
   property string vpnState: ""
 
@@ -17,8 +21,33 @@ BarWidget {
   implicitHeight: button.implicitHeight
 
   function refresh() {
+    // Re-detect on every event: the tunnel may be imported after the bar starts.
+    if (root.configured === "" && !detectProc.running) detectProc.running = true
+    if (root.connection === "") {
+      root.vpnState = ""
+      return
+    }
     if (!stateProc.running) stateProc.running = true
     else refreshDebounce.restart()
+  }
+
+  onConnectionChanged: refresh()
+
+  Process {
+    id: detectProc
+    command: ["nmcli", "-g", "TYPE,NAME", "connection", "show"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        var lines = String(text || "").split("\n")
+        var found = ""
+        for (var i = 0; i < lines.length && found === ""; i++)
+          // Terse output escapes a colon inside a name as "\:".
+          if (lines[i].indexOf("wireguard:") === 0)
+            found = lines[i].slice("wireguard:".length).replace(/\\(.)/g, "$1")
+        root.detected = found
+      }
+    }
   }
 
   Timer {
@@ -61,9 +90,12 @@ BarWidget {
     text: "󰦝"
     dimmed: root.vpnState !== "activated"
     active: root.vpnState === "activating" || root.vpnState === "deactivating"
-    tooltipText: root.connection + ": " + (root.vpnState || "down")
+    tooltipText: root.connection === ""
+      ? "No WireGuard connection in NetworkManager"
+      : root.connection + ": " + (root.vpnState || "down")
     onPressed: function(b) {
       if (!root.bar) return
+      if (b !== Qt.RightButton && root.connection === "") return
       if (b === Qt.RightButton) root.bar.run("xdg-terminal-exec nmtui")
       else {
         root.bar.run("nmcli connection " + (root.vpnState === "activated" ? "down" : "up") + " id " + Util.shellQuote(root.connection))

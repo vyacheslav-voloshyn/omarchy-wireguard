@@ -18,14 +18,14 @@
     "allowMultiple": true,
     "defaultSection": "right",
     "defaults": {
-      "connection": "workpc"
+      "connection": ""
     },
     "schema": [
       {
         "key": "connection",
         "type": "string",
-        "label": "NetworkManager connection name",
-        "defaultValue": "workpc"
+        "label": "NetworkManager connection name (empty: first WireGuard one)",
+        "defaultValue": ""
       }
     ]
   }
